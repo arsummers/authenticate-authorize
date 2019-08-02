@@ -9,8 +9,26 @@ import jwt
 
 from app import db
 
-# TODO:
-# ADD MODELS HERE
+# NOTE: Not sure how I'm supposef to make this interact with the rest of the app. Putting these here so I can play with it later.
+class Author(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), unique=True)
+    books = db.relationship('Book', backref='author', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id':self.id,
+            'name':self.name,
+            'books':[book.to_dict() for book in self.books]
+         }
+
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), unique=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('author.id'), nullable=True)
+
+    def to_dict(self):
+        return {'id':self.id, 'name':self.name}
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,6 +59,7 @@ class User(db.Model):
         for field in ['username', 'email', 'about_me']:
             if field in data:
                 setattr(self, field, data[field])
+
         if new_user and 'password' in data:
             self.set_password(data['password'])
 
@@ -48,8 +67,10 @@ class User(db.Model):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token
+
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
         self.token_expiration = now + timedelta(seconds=expires_in)
+
         db.session.add(self)
         return self.token
 
@@ -59,6 +80,7 @@ class User(db.Model):
     @staticmethod
     def check_token(token):
         user = User.query.filter_by(token=token).first()
+
         if user is None or user.token_expiration < datetime.utcnow():
             return None
         return user

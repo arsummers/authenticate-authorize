@@ -1,1 +1,2 @@
 # authenticate-authorize
+Repo built to practice authentication and authorizaton in python. Base code copied with permission from Code Fellows. Books and authors routes are partially pulled from previous code I have written.

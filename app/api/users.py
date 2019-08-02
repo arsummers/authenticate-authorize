@@ -1,6 +1,6 @@
 from flask import jsonify, request, url_for, g, abort
 from app import db
-from app.models import User
+from app.models import User, Author, Book
 from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request
@@ -30,7 +30,7 @@ def create_user():
 
     if User.query.filter_by(email=data['email']).first():
         return bad_request('please use a different email address')
-        
+
     user = User()
     user.from_dict(data, new_user=True)
     db.session.add(user)
@@ -67,5 +67,14 @@ def ping():
     return 'pong'
 
 
-# TODO: Add own CRUD routes to work with your models
-# Books and authors route here
+# NOTE: again, not sure how to add stuff from these to database, or how they should interact with the rest.
+
+@bp.route('/authors', methods=['GET'])
+def all_authors():
+        authors = [author.to_dict() for author in Author.query.all()]
+        return jsonify(authors)
+
+@bp.route('/books', methods=['GET'])
+def all_books():
+        books = [book.to_dict() for book in Book.query.all()]
+        return jsonify(books)
