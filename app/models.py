@@ -10,7 +10,7 @@ import jwt
 from app import db
 
 # TODO:
-# Add your own model/s
+# ADD MODELS HERE
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
