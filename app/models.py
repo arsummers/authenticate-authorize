@@ -10,26 +10,65 @@ import jwt
 from app import db
 
 
-# will need to set username and passwork to make something capable of taking authentication/authorization
+# will need to set username and password to make something capable of taking authentication/authorization
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True)
     books = db.relationship('Book', backref='author', lazy=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+    token = db.Column(db.String(32), index=True, unique=True)
+    token_expiration = db.Column(db.DateTime)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
     def to_dict(self):
-        return {
+        data =  {
             'id':self.id,
             'name':self.name,
             'books':[book.to_dict() for book in self.books]
-         }
+        }
+        return data
 
-class Book(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256), unique=True)
-    author_id = db.Column(db.Integer, db.ForeignKey('author.id'), nullable=True)
+    def from_dict(self, data, new_user=False):
+        for field in ['username', 'name', 'books']:
+            if field in data:
+                setattr(self, field, data[field])
 
-    def to_dict(self):
-        return {'id':self.id, 'name':self.name}
+    def get_token(self, expires_in=3600):
+        now = datetime.utcnow()
+        if self.token and self.token_expiration > now + timedelta(seconds=60):
+            return self.token
+
+        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
+        self.token_expiration = now + timedelta(seconds=expires_in)
+
+        db.session.add(self)
+        return self.token
+
+    def revoke_token(self):
+        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+
+    @staticmethod
+    def check_token(token):
+        user = User.query.filter_by(token=token).first()
+
+        if user is None or user.token_expiration < datetime.utcnow():
+            return None
+        return user
+    
+
+# class Book(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(256), unique=True)
+#     author_id = db.Column(db.Integer, db.ForeignKey('author.id'), nullable=True)
+
+#     def to_dict(self):
+#         return {'id':self.id, 'name':self.name}
 
 
 
