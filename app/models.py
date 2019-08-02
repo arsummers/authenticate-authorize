@@ -9,7 +9,8 @@ import jwt
 
 from app import db
 
-# NOTE: Not sure how I'm supposef to make this interact with the rest of the app. Putting these here so I can play with it later.
+
+# will need to set username and passwork to make something capable of taking authentication/authorization
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True)
@@ -29,6 +30,8 @@ class Book(db.Model):
 
     def to_dict(self):
         return {'id':self.id, 'name':self.name}
+
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
