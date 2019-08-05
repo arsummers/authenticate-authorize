@@ -62,7 +62,6 @@ def update_user(id):
     return jsonify(user.to_dict())
 
 @bp.route('/ping')
-@token_auth.login_required
 def ping():
     return 'pong'
 

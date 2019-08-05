@@ -9,12 +9,10 @@ import jwt
 
 from app import db
 
-
-# will need to set username and password to make something capable of taking authentication/authorization
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256), unique=True)
-    books = db.relationship('Book', backref='author', lazy=True)
+    author_name = db.Column(db.String(256), unique=True)
+    books = db.Column(db.String(256), unique=True)
     username = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     token = db.Column(db.String(32), index=True, unique=True)
@@ -29,13 +27,13 @@ class Author(db.Model):
     def to_dict(self):
         data =  {
             'id':self.id,
-            'name':self.name,
+            'author_name':self.author_name,
             'books':[book.to_dict() for book in self.books]
         }
         return data
 
     def from_dict(self, data, new_user=False):
-        for field in ['username', 'name', 'books']:
+        for field in ['username', 'author_name', 'books']:
             if field in data:
                 setattr(self, field, data[field])
 
@@ -55,22 +53,12 @@ class Author(db.Model):
 
     @staticmethod
     def check_token(token):
-        user = User.query.filter_by(token=token).first()
+        author = Author.query.filter_by(token=token).first()
 
-        if user is None or user.token_expiration < datetime.utcnow():
+        if author is None or author.token_expiration < datetime.utcnow():
             return None
-        return user
+        return author
     
-
-# class Book(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(256), unique=True)
-#     author_id = db.Column(db.Integer, db.ForeignKey('author.id'), nullable=True)
-
-#     def to_dict(self):
-#         return {'id':self.id, 'name':self.name}
-
-
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
