@@ -1,6 +1,6 @@
 from flask import jsonify, request, url_for, g, abort
 from app import db
-from app.models import User, Author, Book
+from app.models import User, Author
 from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request
@@ -62,19 +62,6 @@ def update_user(id):
     return jsonify(user.to_dict())
 
 @bp.route('/ping')
-@token_auth.login_required
 def ping():
     return 'pong'
 
-
-# NOTE: again, not sure how to add stuff from these to database, or how they should interact with the rest.
-
-@bp.route('/authors', methods=['GET'])
-def all_authors():
-        authors = [author.to_dict() for author in Author.query.all()]
-        return jsonify(authors)
-
-@bp.route('/books', methods=['GET'])
-def all_books():
-        books = [book.to_dict() for book in Book.query.all()]
-        return jsonify(books)

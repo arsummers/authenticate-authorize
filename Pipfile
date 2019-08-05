@@ -14,6 +14,7 @@ flask-httpauth = "*"
 flask-login = "*"
 pytest = "*"
 pyjwt = "*"
+httpie = "*"
 
 [requires]
 python_version = "3.7"
