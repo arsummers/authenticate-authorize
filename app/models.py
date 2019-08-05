@@ -28,7 +28,8 @@ class Author(db.Model):
         data =  {
             'id':self.id,
             'author_name':self.author_name,
-            'books':[book.to_dict() for book in self.books]
+            'books':self.books,
+            'username':self.username
         }
         return data
 
